@@ -15,9 +15,15 @@ def getAction(state, time_left=None):
     #Select a Random Action
     myaction = random.choice(actions)
 
+    maxdiff = 0;
     if state.turn_type == 'Attack':
-        myaction = actions[0]
-
+        for a in actions:
+            if a.to_territory is not None:
+                armydiff = state.armies[state.board.territory_to_id[a.from_territory]] - state.armies[state.board.territory_to_id[a.to_territory]]
+                if(armydiff > maxdiff):
+                    myaction = a
+                    print('Difference of armies: '+str(armydiff)+"\n")
+    
     if state.turn_type == 'Place' or state.turn_type == 'Fortify' or state.turn_type == 'PrePlace':
         possible_actions = []
 
@@ -26,11 +32,11 @@ def getAction(state, time_left=None):
                 for n in state.board.territories[state.board.territory_to_id[a.to_territory]].neighbors:
                     if state.owners[n] != state.current_player:
                         possible_actions.append(a)
-
+                    
         if len(possible_actions) > 0:
             myaction = random.choice(possible_actions)
-
-
+        
+                    
     return myaction
 
 #Stuff below this is just to interface with Risk.pyw GUI version
