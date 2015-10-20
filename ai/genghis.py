@@ -14,7 +14,8 @@ def getAction(state, time_left=None):
 
     #Select a Random Action
     myaction = random.choice(actions)
-
+    
+    # edited by sarah
     maxdiff = 0;
     if state.turn_type == 'Attack':
         for a in actions:
@@ -23,6 +24,7 @@ def getAction(state, time_left=None):
                 if(armydiff > maxdiff):
                     myaction = a
                     print('Difference of armies: '+str(armydiff)+"\n")
+    #edited upto this
     
     if state.turn_type == 'Place' or state.turn_type == 'Fortify' or state.turn_type == 'PrePlace':
         possible_actions = []
