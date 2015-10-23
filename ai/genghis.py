@@ -23,7 +23,7 @@ def getAction(state, time_left=None):
                 armydiff = state.armies[state.board.territory_to_id[a.from_territory]] - state.armies[state.board.territory_to_id[a.to_territory]]
                 if(armydiff > maxdiff):
                     myaction = a
-                    print('Difference of armies: '+str(armydiff)+"\n")
+                    maxdiff = armydiff
     #edited upto this
     
     if state.turn_type == 'Place' or state.turn_type == 'Fortify' or state.turn_type == 'PrePlace':
