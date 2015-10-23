@@ -14,7 +14,7 @@ def getAction(state, time_left=None):
 
     #Select a Random Action
     myaction = random.choice(actions)
-    
+
     # edited by sarah
     maxdiff = 0;
     if state.turn_type == 'Attack':
@@ -25,8 +25,24 @@ def getAction(state, time_left=None):
                     myaction = a
                     maxdiff = armydiff
     #edited upto this
-    
-    if state.turn_type == 'Place' or state.turn_type == 'Fortify' or state.turn_type == 'PrePlace':
+
+    if state.turn_type == 'Fortify':
+        for a in actions:
+            if a.from_territory == None or a.to_territory == None:
+                continue
+            fort = 1
+            for n in state.board.territories[state.board.territory_to_id[a.from_territory]].neighbors:
+                if state.owners[n] != state.current_player:
+                    fort = 0
+                    break
+            if fort == 0:
+                continue
+            for n in state.board.territories[state.board.territory_to_id[a.to_territory]].neighbors:
+                if state.owners[n] != state.current_player:
+                    myaction  = a
+        return myaction
+
+    if state.turn_type == 'Place' or state.turn_type == 'PrePlace':
         possible_actions = []
 
         for a in actions:
@@ -34,11 +50,11 @@ def getAction(state, time_left=None):
                 for n in state.board.territories[state.board.territory_to_id[a.to_territory]].neighbors:
                     if state.owners[n] != state.current_player:
                         possible_actions.append(a)
-                    
+
         if len(possible_actions) > 0:
             myaction = random.choice(possible_actions)
-        
-                    
+
+
     return myaction
 
 #Stuff below this is just to interface with Risk.pyw GUI version
@@ -71,5 +87,3 @@ def Occupation(player,t1,t2):
 
 def Fortification(player):
     return aiWrapper('Fortification')
-
-  
