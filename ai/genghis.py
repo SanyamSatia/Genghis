@@ -26,6 +26,7 @@ def getAction(state, time_left=None):
                     maxdiff = armydiff
     #edited upto this
 
+    #pass troops from any territory not facing enemies to a neighboring territory facing an enemy
     if state.turn_type == 'Fortify':
         for a in actions:
             if a.from_territory == None or a.to_territory == None:
@@ -35,12 +36,14 @@ def getAction(state, time_left=None):
                 if state.owners[n] != state.current_player:
                     fort = 0
                     break
+            #don't move troops if territory facing a neighbor
             if fort == 0:
                 continue
+            
             for n in state.board.territories[state.board.territory_to_id[a.to_territory]].neighbors:
                 if state.owners[n] != state.current_player:
                     myaction  = a
-        return myaction
+
     if state.turn_type == 'PreAssign':
         possible_actions = []
         territories =['Eastern Australia', 'Western Australia', 'Colombia', 'Chile', 'Peru', 'Brazil', 'Indonesia', 'New Guinea']
@@ -59,6 +62,7 @@ def getAction(state, time_left=None):
         else:
             myaction = random.choice(actions)
             #s = myaction.print_action()
+
     if state.turn_type == 'PrePlace':
         possible_actions = []
         bordering_armies = 0
