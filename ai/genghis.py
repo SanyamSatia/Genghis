@@ -41,7 +41,37 @@ def getAction(state, time_left=None):
                 if state.owners[n] != state.current_player:
                     myaction  = a
         return myaction
+    if state.turn_type == 'PreAssign':
+        possible_actions = []
+        territories =['Eastern Australia', 'Western Australia', 'Colombia', 'Chile', 'Peru', 'Brazil', 'Indonesia', 'New Guinea']
+        for a in actions:
+            #if the territories above are not occupied, try to occupy it
+            if a.to_territory in territories:
+                #s = a.print_action()
+                return a
+            else:
+                #number_of_fronts = len(state.board.territories[state.board.territory_to_id[a.to_territory]].neighbors)
+                if TFrontsCount(state.board.territories[state.board.territory_to_id[a.to_territory]], None) <4:
+                    possible_actions.append(a)
 
+        if len(possible_actions) > 0:
+            myaction = random.choice(possible_actions)
+        else:
+            myaction = random.choice(actions)
+            #s = myaction.print_action()
+    if state.turn_type == 'PrePlace':
+        possible_actions = []
+        bordering_armies = 0
+        for a in actions:
+            #check to see how many tiles are bordering with the enemies
+            if TFrontsCount(state.board.territories[state.board.territory_to_id[a.to_territory]], None) >0:
+                for n in state.board.territories[state.board.territory_to_id[a.to_territory]].neighbors:
+                    if state.owners[n] != state.current_player:
+                        bordering_armies += state.armies[n]
+                if bordering_armies > state.armies[state.board.territory_to_id[a.to_territory]]:
+                    possible_actions.append(a)
+        if len(possible_actions) > 0:
+            myaction = random.choice(possible_actions)
     if state.turn_type == 'Place' or state.turn_type == 'PrePlace':
         possible_actions = []
 
