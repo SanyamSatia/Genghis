@@ -16,14 +16,26 @@ def getAction(state, time_left=None):
     myaction = random.choice(actions)
 
     # edited by sarah
-    maxdiff = 0;
+    max_sum=0
     if state.turn_type == 'Attack':
         for a in actions:
             if a.to_territory is not None:
+                frndneigh=0
+                for n in state.board.territories[state.board.territory_to_id[a.to_territory]].neighbors:
+                    if state.owners[n] == state.current_player:
+                        frndneigh+=1
                 armydiff = state.armies[state.board.territory_to_id[a.from_territory]] - state.armies[state.board.territory_to_id[a.to_territory]]
-                if(armydiff > maxdiff):
-                    myaction = a
-                    maxdiff = armydiff
+                successor_states, successor_probs = simulateAttack(state,a)
+                if successor_probs[0] == 1:
+                    print('card logic')
+                p=0
+                for s in successor_states:
+                    if s.owners[state.board.territory_to_id[a.to_territory]] == state.current_player:
+                        sum = 4*armydiff + successor_probs[p] + frndneigh
+                        if sum > max_sum:
+                            max_sum = sum
+                            myaction = a
+                    p=p+1
     #edited upto this
 
     #pass troops from any territory not facing enemies to a neighboring territory facing an enemy
