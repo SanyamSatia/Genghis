@@ -69,24 +69,17 @@ def getAction(state, time_left=None):
 
     if state.turn_type == 'PreAssign':
         possible_actions = []
-        aus_continent =['Eastern Australia', 'Western Australia','Indonesia', 'New Guinea'] 
-        south_america =['Colombia', 'Chile', 'Peru', 'Brazil' ]
+        territories =['Eastern Australia', 'Western Australia', 'Colombia', 'Chile', 'Peru', 'Brazil', 'Indonesia', 'New Guinea']
         for a in actions:
             #if the territories above are not occupied, try to occupy it
-            if a.to_territory in aus_continent:
-                #print state.continent[state.board.territory_to_id[a.to_territory]]
+            if a.to_territory in territories:
+                #s = a.print_action()
                 return a
-        for a in actions:
-            #if the territories above are not occupied, try to occupy it
-            if a.to_territory in south_america:
-                return a
-        for a in actions:
-            for n in state.board.territories[state.board.territory_to_id[a.to_territory]].neighbors:
-                if state.owners[n] == state.current_player:
+            else:
+                #number_of_fronts = len(state.board.territories[state.board.territory_to_id[a.to_territory]].neighbors)
+                if TFrontsCount(state.board.territories[state.board.territory_to_id[a.to_territory]], None) <4:
                     possible_actions.append(a)
-            for action in possible_actions:
-                if TFrontsCount(state.board.territories[state.board.territory_to_id[action.to_territory]], None) <4:
-                    return action
+
         if len(possible_actions) > 0:
             myaction = random.choice(possible_actions)
         else:
@@ -113,31 +106,11 @@ def getAction(state, time_left=None):
                 for n in state.board.territories[state.board.territory_to_id[a.to_territory]].neighbors:
                     if state.owners[n] != state.current_player:
                         possible_actions.append(a)
-                    
+
         if len(possible_actions) > 0:
             myaction = random.choice(possible_actions)
-        
-                    
-    return myaction
 
-        #for a in actions:
-        #    if a.to_territory is not None:
-        #        for n in state.board.territories[state.board.territory_to_id[a.to_territory]].neighbors:
-        #            if state.owners[n] != state.current_player:
-        #                possible_actions.append(a)
-        #if len(possible_actions) > 0:
-        #    myaction = random.choice(possible_actions)
     return myaction
-def heuristic(state):
-    """Returns a number telling how good this state is"""
-    continent = TContinent(state)
-    a, b, c, d = CAnalysis(continent)
-    heuristic = math.floor((a+1)/3)
-    if c%d == 0:
-        heuristic+=1
-    return heuristic
-#Stuff below this is just to interface with Risk.pyw GUI version
-#DO NOT MODIFY
 
 def compute_probability(homarmy, opparmy):
     prob=0.0
@@ -147,6 +120,17 @@ def compute_probability(homarmy, opparmy):
     prob*=0.1
     return prob
 
+def heuristic(state):
+    """Returns a number telling how good this state is"""
+    continent = TContinent(state)
+    a, b, c, d = CAnalysis(continent)
+    heuristic = math.floor((a+1)/3)
+    if c%d == 0:
+        heuristic+=1
+    return heuristic
+
+#Stuff below this is just to interface with Risk.pyw GUI version
+#DO NOT MODIFY
 
 def aiWrapper(function_name, occupying=None):
     game_board = createRiskBoard()
