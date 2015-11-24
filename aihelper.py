@@ -132,7 +132,7 @@ def CTerritoriesCount(con):
 def CAnalysis(con, pl=None):
     if pl is None: pl = riskengine.currentplayer
     con = tocontinent(con)
-    continentterrs = [x for x in riskengine.territories.values() if x.continent == con]
+    continentterrs = [x for x in riskengine.territories.values() if x.continent== con]
     myterrs = [x for x in continentterrs if x.player == pl]
     enemyterrs = [x for x in continentterrs if x.player != pl and x.player is not None]
     myarmy = sum([t.armies for t in myterrs])

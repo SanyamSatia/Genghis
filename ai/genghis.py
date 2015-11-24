@@ -17,14 +17,36 @@ def getAction(state, time_left=None):
     myaction = random.choice(actions)
 
     # edited by sarah
-    maxdiff = 0;
+    max_sum=0
     if state.turn_type == 'Attack':
+        bestprob=0.0
         for a in actions:
             if a.to_territory is not None:
-                armydiff = state.armies[state.board.territory_to_id[a.from_territory]] - state.armies[state.board.territory_to_id[a.to_territory]]
-                if(armydiff > maxdiff):
-                    myaction = a
-                    maxdiff = armydiff
+
+                opparmy = state.armies[state.board.territory_to_id[a.to_territory]]
+                homarmy = state.armies[state.board.territory_to_id[a.from_territory]]
+                curprob = compute_probability(homarmy,opparmy)
+
+                if(curprob>bestprob):
+                    bestprob=curprob
+                    myaction=a
+
+                '''
+                successor_states, successor_probs = simulateAttack(state,a)
+                if successor_probs[0] == 1:
+                    print('card logic')
+                p=0
+                for s in successor_states:
+                    if s.owners[state.board.territory_to_id[a.to_territory]] == state.current_player:
+                        sum = 4*armydiff + successor_probs[p] + frndneigh
+                        if sum > max_sum:
+                            max_sum = sum
+                            myaction = a
+                    p=p+1
+                '''
+        #best attack probability found through experimentation
+        if(bestprob<0.19):
+            myaction=actions[-1]
     #edited upto this
 
     #pass troops from any territory not facing enemies to a neighboring territory facing an enemy
@@ -40,7 +62,7 @@ def getAction(state, time_left=None):
             #don't move troops if territory facing a neighbor
             if fort == 0:
                 continue
-            
+
             for n in state.board.territories[state.board.territory_to_id[a.to_territory]].neighbors:
                 if state.owners[n] != state.current_player:
                     myaction  = a
@@ -52,7 +74,7 @@ def getAction(state, time_left=None):
         for a in actions:
             #if the territories above are not occupied, try to occupy it
             if a.to_territory in aus_continent:
-                print state.continent[state.board.territory_to_id[a.to_territory]]
+                #print state.continent[state.board.territory_to_id[a.to_territory]]
                 return a
         for a in actions:
             #if the territories above are not occupied, try to occupy it
@@ -116,6 +138,15 @@ def heuristic(state):
     return heuristic
 #Stuff below this is just to interface with Risk.pyw GUI version
 #DO NOT MODIFY
+
+def compute_probability(homarmy, opparmy):
+    prob=0.0
+    if(homarmy>=3 and opparmy>=2):
+        homarmy=homarmy*1.15
+    prob=homarmy/opparmy
+    prob*=0.1
+    return prob
+
 
 def aiWrapper(function_name, occupying=None):
     game_board = createRiskBoard()
