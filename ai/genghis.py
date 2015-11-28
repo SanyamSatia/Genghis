@@ -25,12 +25,13 @@ def getAction(state, time_left=None):
                 opparmy = state.armies[state.board.territory_to_id[a.to_territory]]
                 homarmy = state.armies[state.board.territory_to_id[a.from_territory]]
                 curprob = compute_probability(homarmy,opparmy)
-                fcost=curh+curprob
+                fcost=curprob+curh
 
                 if(fcost > bestf):
                     bestf = fcost
                     bestp=curprob
                     myaction=a
+
                 '''
                 successor_states, successor_probs = simulateAttack(state,a)
                 if successor_probs[0] == 1:
@@ -99,6 +100,7 @@ def getAction(state, time_left=None):
                     possible_actions.append(a)
         if len(possible_actions) > 0:
             myaction = random.choice(possible_actions)
+
     if state.turn_type == 'Place':
         min_enem_neigh=100
         for a in actions:
@@ -155,7 +157,7 @@ def heuristic(state, territory):
         heuristic += 1
     elif continentName == "Africa":
         heuristic += 2
-    return (heuristic/50)
+    return (heuristic/2500)
 
 def compute_probability(homarmy, opparmy):
     prob=0.0
