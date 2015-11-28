@@ -9,11 +9,8 @@ from risktools import *
 #This is the function implement to implement an AI.  Then this ai will work with either the gui or the play_risk_ai script
 def getAction(state, time_left=None):
     """This is the main AI function.  It should return a valid AI action for this state."""
-
     #Get the possible actions in this state
     actions = getAllowedActions(state)
-
-    #Select a Random Action
     myaction = random.choice(actions)
 
     # edited by sarah
@@ -22,13 +19,14 @@ def getAction(state, time_left=None):
         bestprob=0.0
         for a in actions:
             if a.to_territory is not None:
-
+                #h =  heuristic(state, state.board.territory_to_id[a.to_territory])
                 opparmy = state.armies[state.board.territory_to_id[a.to_territory]]
                 homarmy = state.armies[state.board.territory_to_id[a.from_territory]]
                 curprob = compute_probability(homarmy,opparmy)
 
-                if(curprob>bestprob):
-                    bestprob=curprob
+                if(curprob > bestprob):
+                   
+                    bestprob= curprob
                     myaction=a
 
                 '''
@@ -68,13 +66,13 @@ def getAction(state, time_left=None):
                     myaction  = a
 
     if state.turn_type == 'PreAssign':
+
         possible_actions = []
         aus_continent =['Eastern Australia', 'Western Australia','Indonesia', 'New Guinea'] 
         south_america =['Colombia', 'Chile', 'Peru', 'Brazil' ]
         for a in actions:
             #if the territories above are not occupied, try to occupy it
             if a.to_territory in aus_continent:
-                #print state.continent[state.board.territory_to_id[a.to_territory]]
                 return a
         for a in actions:
             #if the territories above are not occupied, try to occupy it
@@ -128,14 +126,44 @@ def getAction(state, time_left=None):
         #if len(possible_actions) > 0:
         #    myaction = random.choice(possible_actions)
     return myaction
-def heuristic(state):
+#return the continent of the given territory.
+def toContinent(state, territory):
+     for c in state.board.continents.itervalues():
+        if territory in c.territories:
+            #print "territoriesOwned: ", territoriesOwned(state, c)
+            return c
+#calculate the percentage of owned territories in the continent, assuming if he can take this territories.
+def continentProgress (state, continent):
+    terrOwned = 0.0
+    terrContinent = 0.0
+    for territories in continent.territories:
+        terrContinent +=1.0
+        if state.owners[territories] == state.current_player:
+            terrOwned += 1.0
+    return (terrOwned+1.0)/terrContinent 
+def heuristic(state, territory):
     """Returns a number telling how good this state is"""
-    continent = TContinent(state)
-    a, b, c, d = CAnalysis(continent)
-    heuristic = math.floor((a+1)/3)
-    if c%d == 0:
-        heuristic+=1
+    heuristic = 0
+    continent = toContinent(state, territory)
+    progress = continentProgress(state, continent)
+    heuristic = 10.0 * progress
+    if progress ==1:
+        heuristic += 10
+    #print "yesssss"
+    continentName = continent.name
+    if continentName == "N. America":
+        heuristic += 5
+    elif continentName == "S. America":
+        heuristic += 4
+    elif continentName =="Australia":
+        heuristic += 3
+    elif continentName == "Europe":
+        heuristic += 1
+    elif continentName == "Africa":
+        heuristic += 2
     return heuristic
+    #a, b, c, d = CAnalysis(continent)
+    #print ("a: " , a,  " b: " , b ,  " c: " , c , " d: " , d)
 #Stuff below this is just to interface with Risk.pyw GUI version
 #DO NOT MODIFY
 
