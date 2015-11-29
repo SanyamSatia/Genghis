@@ -68,16 +68,20 @@ def getAction(state, time_left=None):
     if state.turn_type == 'PreAssign':
 
         possible_actions = []
-        territories =['Eastern Australia', 'Western Australia', 'Colombia', 'Chile', 'Peru', 'Brazil', 'Indonesia', 'New Guinea']
+        south_america = ['Colombia', 'Chile', 'Peru', 'Brazil']
+        australia =['Eastern Australia', 'Western Australia', 'Indonesia', 'New Guinea']
         for a in actions:
             #if the territories above are not occupied, try to occupy it
-            if a.to_territory in territories:
-                #s = a.print_action()
+            if a.to_territory in south_america:
                 return a
-            else:
-                #number_of_fronts = len(state.board.territories[state.board.territory_to_id[a.to_territory]].neighbors)
-                if TFrontsCount(state.board.territories[state.board.territory_to_id[a.to_territory]], None) <4:
-                    possible_actions.append(a)
+        for a in actions:
+            #if the territories above are not occupied, try to occupy it
+            if a.to_territory in australia:
+                return a
+        for a in actions:
+            #number_of_fronts = len(state.board.territories[state.board.territory_to_id[a.to_territory]].neighbors)
+            if TFrontsCount(state.board.territories[state.board.territory_to_id[a.to_territory]], None) <4:
+                possible_actions.append(a)
 
         if len(possible_actions) > 0:
             myaction = random.choice(possible_actions)
@@ -114,7 +118,6 @@ def getAction(state, time_left=None):
 def toContinent(state, territory):
      for c in state.board.continents.itervalues():
         if territory in c.territories:
-            #print "territoriesOwned: ", territoriesOwned(state, c)
             return c
 #calculate the percentage of owned territories in the continent, assuming if he can take this territories.
 def continentProgress (state, continent):
