@@ -16,17 +16,20 @@ def getAction(state, time_left=None):
     # edited by sarah
     max_sum=0
     if state.turn_type == 'Attack':
-        bestprob=0.0
+        bestp=0.0
+        besth=0.0
+        bestf=0.0
         for a in actions:
             if a.to_territory is not None:
-                #h =  heuristic(state, state.board.territory_to_id[a.to_territory])
+                curh =  heuristic(state, state.board.territory_to_id[a.to_territory])
                 opparmy = state.armies[state.board.territory_to_id[a.to_territory]]
                 homarmy = state.armies[state.board.territory_to_id[a.from_territory]]
                 curprob = compute_probability(homarmy,opparmy)
+                fcost=curprob+curh
 
-                if(curprob > bestprob):
-                   
-                    bestprob= curprob
+                if(fcost > bestf):
+                    bestf = fcost
+                    bestp=curprob
                     myaction=a
 
                 '''
@@ -43,7 +46,7 @@ def getAction(state, time_left=None):
                     p=p+1
                 '''
         #best attack probability found through experimentation
-        if(bestprob<0.19):
+        if(bestp<0.76):
             myaction=actions[-1]
     #edited upto this
 
@@ -101,17 +104,27 @@ def getAction(state, time_left=None):
                     possible_actions.append(a)
         if len(possible_actions) > 0:
             myaction = random.choice(possible_actions)
-    if state.turn_type == 'Place':
-        possible_actions = []
 
+    if state.turn_type == 'Place':
+        min_enem_neigh=100
         for a in actions:
             if a.to_territory is not None:
+                enem_neigh=0
                 for n in state.board.territories[state.board.territory_to_id[a.to_territory]].neighbors:
                     if state.owners[n] != state.current_player:
-                        possible_actions.append(a)
-
-        if len(possible_actions) > 0:
-            myaction = random.choice(possible_actions)
+                        enem_neigh += 1
+                        #check troops difference between enemy neighbour and mine
+                        my_troops = state.armies[state.board.territory_to_id[a.to_territory]]
+                        neigh_troops = state.armies[n]
+                        if my_troops > (neigh_troops*3):
+                            enem_neigh=0
+                            break
+                if(enem_neigh>0 and enem_neigh < min_enem_neigh):
+                    min_enem_neigh = enem_neigh
+                    myaction = a
+        if min_enem_neigh == 100:
+            #print "random place action"
+            myaction = random.choice(actions)
 
     return myaction
 #return the continent of the given territory.
@@ -127,7 +140,8 @@ def continentProgress (state, continent):
         terrContinent +=1.0
         if state.owners[territories] == state.current_player:
             terrOwned += 1.0
-    return (terrOwned+1.0)/terrContinent 
+    return (terrOwned+1.0)/terrContinent
+
 def heuristic(state, territory):
     heuristic = 0
     continent = toContinent(state, territory)
@@ -135,7 +149,6 @@ def heuristic(state, territory):
     heuristic = 10.0 * progress
     if progress ==1:
         heuristic += 10
-    #print "yesssss"
     continentName = continent.name
     if continentName == "N. America":
         heuristic += 5
@@ -147,13 +160,14 @@ def heuristic(state, territory):
         heuristic += 1
     elif continentName == "Africa":
         heuristic += 2
-    return heuristic
+    return (heuristic/2500)
+
 def compute_probability(homarmy, opparmy):
     prob=0.0
     if(homarmy>=3 and opparmy>=2):
         homarmy=homarmy*1.15
     prob=homarmy/opparmy
-    prob*=0.1
+    prob*=0.4
     return prob
 
 #Stuff below this is just to interface with Risk.pyw GUI version
