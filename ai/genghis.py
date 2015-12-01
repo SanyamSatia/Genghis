@@ -110,7 +110,6 @@ def getAction(state, time_left=None):
                 if state.owners[m] == state.current_player and strongest_neighbor < state.armies[m]:
                     strongest_neighbor = state.armies[m]
             if strongest_neighbor > 3*(weakest_armies):
-                possible_actions.remove(action)
                 break
             else:
                 h = heuristic_preplace(state, state.board.territory_to_id[action.to_territory])
