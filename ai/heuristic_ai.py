@@ -48,7 +48,6 @@ def getAction(state, time_left=None):
         if(bestp<0.76):
             myaction=actions[-1]
     #edited upto this
-
     #pass troops from any territory not facing enemies to a neighboring territory facing an enemy
     if state.turn_type == 'Fortify':
         for a in actions:
@@ -107,10 +106,8 @@ def getAction(state, time_left=None):
             for m in state.board.territories[target].neighbors:
                 if state.owners[m] == state.current_player and strongest_neighbor < state.armies[m]:
                     strongest_neighbor = state.armies[m]
-            prob = compute_probability(strongest_neighbor, state.armies)
-            if strongest_neighbor >= 2*(weakest_armies):
-                actions.remove(a)
-                break
+            if strongest_neighbor >= 3*(weakest_armies):
+                continue
             else:
                 h = heuristic_preplace(state, state.board.territory_to_id[action.to_territory])
                 if best_heuristic <h:
@@ -136,6 +133,9 @@ def getAction(state, time_left=None):
                     myaction = a
         if min_enem_neigh == 100:
             #print "random place action"
+            myaction = random.choice(actions)
+    if state.turn_type == 'TurnInCards':
+        if len(state.players[state.current_player].cards) >= 3:
             myaction = random.choice(actions)
 
     return myaction
@@ -169,6 +169,7 @@ def heuristic_preplace(state, territory):
         heuristic += 3
 
     return heuristic
+
 def heuristic(state, territory):
     heuristic = 0
     continent = toContinent(state, territory)
