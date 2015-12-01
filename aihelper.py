@@ -74,10 +74,6 @@ def TContinent(terr):
 
 def TIsBordering(terr, terr2):
     return terr.neighboring(terr2)
-    
-    
-    
-
 def toplayer(player):
     if isinstance(player, riskengine.Territory): 
         return player.player

@@ -12,7 +12,6 @@ def getAction(state, time_left=None):
     #Get the possible actions in this state
     actions = getAllowedActions(state)
     myaction = random.choice(actions)
-
     # edited by sarah
     max_sum=0
     if state.turn_type == 'Attack':
@@ -70,7 +69,7 @@ def getAction(state, time_left=None):
 
     if state.turn_type == 'PreAssign':
 
-        possible_actions = []
+        best_heuristic = 0.0
         south_america = ['Colombia', 'Chile', 'Peru', 'Brazil']
         australia =['Eastern Australia', 'Western Australia', 'Indonesia', 'New Guinea']
         for a in actions:
@@ -82,28 +81,39 @@ def getAction(state, time_left=None):
             if a.to_territory in australia:
                 return a
         for a in actions:
-            #number_of_fronts = len(state.board.territories[state.board.territory_to_id[a.to_territory]].neighbors)
-            if TFrontsCount(state.board.territories[state.board.territory_to_id[a.to_territory]], None) <4:
-                possible_actions.append(a)
-
-        if len(possible_actions) > 0:
-            myaction = random.choice(possible_actions)
-        else:
-            myaction = random.choice(actions)
+            if a.to_territory is not None:
+                h = heuristic(state, state.board.territory_to_id[a.to_territory])
+                if best_heuristic < h:
+                    best_heuristic = h
+                    myaction = a
 
     if state.turn_type == 'PrePlace':
         possible_actions = []
-        bordering_armies = 0
+        weakest_armies = 100
+        strongest_neighbor=0
+        best_heuristic = 0.0
+        target = None
+        myarmy = 0
         for a in actions:
-            #check to see how many tiles are bordering with the enemies
-            if TFrontsCount(state.board.territories[state.board.territory_to_id[a.to_territory]], None) >0:
+            if a.to_territory is not None:
                 for n in state.board.territories[state.board.territory_to_id[a.to_territory]].neighbors:
                     if state.owners[n] != state.current_player:
-                        bordering_armies += state.armies[n]
-                if bordering_armies > state.armies[state.board.territory_to_id[a.to_territory]]:
-                    possible_actions.append(a)
-        if len(possible_actions) > 0:
-            myaction = random.choice(possible_actions)
+                        possible_actions.append(a)
+        for action in possible_actions:
+            for n in state.board.territories[state.board.territory_to_id[action.to_territory]].neighbors:
+                if state.owners[n] != state.current_player and weakest_armies > state.armies[n]:
+                    weakest_armies = state.armies[n]
+                    target = n
+            for m in state.board.territories[target].neighbors:
+                if state.owners[m] == state.current_player and strongest_neighbor < state.armies[m]:
+                    strongest_neighbor = state.armies[m]
+            if strongest_neighbor >= 3*(weakest_armies):
+                continue
+            else:
+                h = heuristic_preplace(state, state.board.territory_to_id[action.to_territory])
+                if best_heuristic <h:
+                    best_heuristic = h
+                    myaction = action
 
     if state.turn_type == 'Place':
         min_enem_neigh=100
@@ -141,13 +151,29 @@ def continentProgress (state, continent):
         if state.owners[territories] == state.current_player:
             terrOwned += 1.0
     return (terrOwned+1.0)/terrContinent
+def heuristic_preplace(state, territory):
+    heuristic = state.armies[territory]*0.5
+    continent = toContinent(state, territory)
+    continentName = continent.name
+    if continentName == "N. America":
+        heuristic += 5
+    elif continentName == "S. America":
+        heuristic += 4
+    elif continentName =="Australia":
+        heuristic += 2
+    elif continentName == "Europe":
+        heuristic += 1
+    elif continentName == "Africa":
+        heuristic += 3
+
+    return heuristic
 
 def heuristic(state, territory):
     heuristic = 0
     continent = toContinent(state, territory)
     progress = continentProgress(state, continent)
     heuristic = 10.0 * progress
-    if progress ==1:
+    if progress >0.8:
         heuristic += 10
     continentName = continent.name
     if continentName == "N. America":
@@ -155,11 +181,11 @@ def heuristic(state, territory):
     elif continentName == "S. America":
         heuristic += 4
     elif continentName =="Australia":
-        heuristic += 3
+        heuristic += 2
     elif continentName == "Europe":
         heuristic += 1
     elif continentName == "Africa":
-        heuristic += 2
+        heuristic += 3
     return (heuristic/2500)
 
 def compute_probability(homarmy, opparmy):
