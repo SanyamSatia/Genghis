@@ -117,7 +117,11 @@ def getAction(state, time_left=None):
                 if best_heuristic <h:
                     best_heuristic = h
                     myaction = action
-
+                    
+    if state.turn_type == 'Occupy':
+        if len(actions) > 0:
+            myaction = actions[-1]
+            
     if state.turn_type == 'Place':
         min_enem_neigh=100
         for a in actions:
